@@ -482,20 +482,22 @@ document.getElementById('card').addEventListener('touchend', e => {
   }
 });
 
-// Wheel events (desktop)
-document.getElementById('card').addEventListener('wheel', e => {
-  if (phase !== 'wishes' || isTransitioning) return;
-  e.preventDefault();
-  if (e.deltaY > 0) {
-    if (currentWish === totalWishes - 1) {
-      startCakePhase();
+// Wheel events (desktop only — mobile browsers fire synthetic wheel events)
+if (isDesktop) {
+  document.getElementById('card').addEventListener('wheel', e => {
+    if (phase !== 'wishes' || isTransitioning) return;
+    e.preventDefault();
+    if (e.deltaY > 0) {
+      if (currentWish === totalWishes - 1) {
+        startCakePhase();
+      } else {
+        showWish(currentWish + 1, 'up');
+      }
     } else {
-      showWish(currentWish + 1, 'up');
+      showWish(currentWish - 1, 'down');
     }
-  } else {
-    showWish(currentWish - 1, 'down');
-  }
-}, { passive: false });
+  }, { passive: false });
+}
 
 function spawnConfetti() {
   const colors = ['#ff6b9d', '#ffd700', '#66ccff', '#66ff99', '#ff9966', '#cc66ff', '#ff6699'];
