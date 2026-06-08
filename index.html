@@ -63,14 +63,18 @@
       0%, 100% { transform: translateY(0); }
       50% { transform: translateY(-10px); }
     }
-    .wish-container, .cake-stage {
+    .wish-container {
+      position: absolute; inset: 0;
+      display: flex; justify-content: center; align-items: center;
+    }
+    .cake-stage {
       position: absolute; inset: 0;
       display: flex; justify-content: center; align-items: center;
     }
     .cake-stage { opacity: 0; pointer-events: none; flex-direction: column; }
 
     .wish-text {
-      position: absolute; inset: 0;
+      position: absolute; top: 35vh; left: 0; right: 0;
       font-size: clamp(1.5rem, 5vw, 2.2rem);
       color: #ffffff;
       text-align: center;
@@ -344,6 +348,7 @@ let isTransitioning = false;
 let cakeTimer = null;
 let audioCtx = null;
 const totalWishes = 6;
+const isDesktop = !('ontouchstart' in window) && window.matchMedia('(pointer: fine)').matches;
 
 const wishEls = document.querySelectorAll('.wish-text');
 const hintZone = document.getElementById('hintZone');
@@ -455,12 +460,14 @@ function showWish(index, direction) {
 }
 
 function updateHint() {
+  const actionText = isDesktop ? '滚动鼠标滚轮' : '向上滑动';
   if (currentWish === totalWishes - 1) {
-    hintZone.innerHTML = '<span class="hint-text">向上滑动查看惊喜</span><span class="hint-arrow">↑</span>';
+    hintZone.innerHTML = `<span class="hint-text">${actionText}查看惊喜</span><span class="hint-arrow">↑</span>`;
   } else {
-    hintZone.innerHTML = '<span class="hint-text">向上滑动</span><span class="hint-arrow">↑</span>';
+    hintZone.innerHTML = `<span class="hint-text">${actionText}</span><span class="hint-arrow">↑</span>`;
   }
 }
+updateHint();
 
 // Touch events
 document.getElementById('card').addEventListener('touchstart', e => {
