@@ -342,6 +342,7 @@ let phase = 'wishes';
 let touchStartY = 0;
 let isTransitioning = false;
 let cakeTimer = null;
+let audioCtx = null;
 const totalWishes = 6;
 
 const wishEls = document.querySelectorAll('.wish-text');
@@ -350,8 +351,9 @@ const titleZone = document.getElementById('titleZone');
 const cakeStage = document.getElementById('cakeStage');
 
 function playBirthdaySong() {
+  if (!audioCtx) return;
   try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    audioCtx.resume();
     const notes = [
       { freq: 262, dur: 0.25 }, { freq: 262, dur: 0.25 }, { freq: 294, dur: 0.5  },
       { freq: 262, dur: 0.5  }, { freq: 349, dur: 0.5  }, { freq: 330, dur: 0.75 },
@@ -363,16 +365,16 @@ function playBirthdaySong() {
       { freq: 466, dur: 0.25 }, { freq: 466, dur: 0.25 }, { freq: 440, dur: 0.5  },
       { freq: 349, dur: 0.5  }, { freq: 392, dur: 0.5  }, { freq: 349, dur: 0.75 },
     ];
-    let time = ctx.currentTime + 0.1;
+    let time = audioCtx.currentTime + 0.1;
     notes.forEach(({ freq, dur }) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
       osc.type = 'sine';
       osc.frequency.value = freq;
       gain.gain.setValueAtTime(0.3, time);
       gain.gain.exponentialRampToValueAtTime(0.01, time + dur - 0.02);
       osc.connect(gain);
-      gain.connect(ctx.destination);
+      gain.connect(audioCtx.destination);
       osc.start(time);
       osc.stop(time + dur);
       time += dur + 0.02;
@@ -422,6 +424,12 @@ function showWish(index, direction) {
   if (phase !== 'wishes') return;
 
   isTransitioning = true;
+
+  // Initialize AudioContext on first user interaction to comply with browser autoplay policy
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+
   const exitClass = direction === 'up' ? 'exit-up' : 'exit-down';
 
   wishEls[currentWish].classList.remove('active');
