@@ -172,7 +172,7 @@
     .drip3 { height: 16px; bottom: -12px; right: 30px; }
 
     /* Candle */
-    .candle { bottom: 168px; left: 50%; transform: translateX(-50%) translateY(-80px); width: 28px; height: 70px; }
+    .candle { bottom: 148px; left: 50%; transform: translateX(-50%) translateY(-80px); width: 28px; height: 70px; }
     .candle-body {
       width: 28px; height: 56px;
       background: linear-gradient(90deg, #ff6b8a 0%, #ffa0b4 30%, #ff6b8a 60%, #ffa0b4 100%);
@@ -345,7 +345,6 @@
 let phase = 'wishes';
 let touchStartY = 0;
 let isTransitioning = false;
-let cakeTimer = null;
 let audioCtx = null;
 const totalWishes = 6;
 const isDesktop = !('ontouchstart' in window) && window.matchMedia('(pointer: fine)').matches;
@@ -445,15 +444,9 @@ function showWish(index, direction) {
 
   currentWish = index;
 
-  if (cakeTimer) { clearTimeout(cakeTimer); cakeTimer = null; }
-
   setTimeout(() => {
     wishEls.forEach(el => el.classList.remove('exit-up', 'exit-down'));
     isTransitioning = false;
-
-    if (currentWish === totalWishes - 1 && typeof startCakePhase === 'function') {
-      cakeTimer = setTimeout(startCakePhase, 800);
-    }
   }, 500);
 
   updateHint();
@@ -479,7 +472,11 @@ document.getElementById('card').addEventListener('touchend', e => {
   const deltaY = touchStartY - e.changedTouches[0].clientY;
   if (Math.abs(deltaY) < 40) return;
   if (deltaY > 0) {
-    showWish(currentWish + 1, 'up');
+    if (currentWish === totalWishes - 1) {
+      startCakePhase();
+    } else {
+      showWish(currentWish + 1, 'up');
+    }
   } else {
     showWish(currentWish - 1, 'down');
   }
@@ -490,7 +487,11 @@ document.getElementById('card').addEventListener('wheel', e => {
   if (phase !== 'wishes' || isTransitioning) return;
   e.preventDefault();
   if (e.deltaY > 0) {
-    showWish(currentWish + 1, 'up');
+    if (currentWish === totalWishes - 1) {
+      startCakePhase();
+    } else {
+      showWish(currentWish + 1, 'up');
+    }
   } else {
     showWish(currentWish - 1, 'down');
   }
