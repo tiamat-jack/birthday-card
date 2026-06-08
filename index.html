@@ -297,13 +297,32 @@
 </head>
 <body>
   <script>
-    // Hide mobile browser address bar by triggering a minimal scroll
-    (function() {
+    // Hide mobile browser chrome (address bar) — especially for QR code entry
+    (function hideChrome() {
       var html = document.documentElement;
-      html.style.height = '101%';
+
+      // 1) Scroll trick — works on many Android browsers & older iOS
+      var origH = html.style.height;
+      var origO = html.style.overflow;
+      html.style.height = '100.5%';
+      html.style.overflow = 'auto';
       window.scrollTo(0, 1);
+
+      // 2) WeChat / Weixin built-in browser
+      if (typeof WeixinJSBridge !== 'undefined') {
+        try { WeixinJSBridge.call('hideToolbar'); } catch(e) {}
+        try { WeixinJSBridge.call('hideOptionMenu'); } catch(e) {}
+      }
+
+      // 3) QQ browser & other Chinese in-app browsers
+      if (typeof mqq !== 'undefined' && mqq.ui) {
+        try { mqq.ui.setTitleButtons({ left: { hidden: true }, right: { hidden: true } }); } catch(e) {}
+      }
+
+      // Reset after scroll trick takes effect
       requestAnimationFrame(function() {
-        html.style.height = '';
+        html.style.height = origH;
+        html.style.overflow = origO;
         window.scrollTo(0, 0);
       });
     })();
