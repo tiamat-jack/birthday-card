@@ -382,6 +382,7 @@ let phase = 'wishes';
 let touchStartY = 0;
 let isTransitioning = false;
 let birthdayAudio = null;
+let ambientAudio = null;
 const totalWishes = 6;
 const isDesktop = !('ontouchstart' in window) && window.matchMedia('(pointer: fine)').matches;
 
@@ -390,7 +391,25 @@ const hintZone = document.getElementById('hintZone');
 const titleZone = document.getElementById('titleZone');
 const cakeStage = document.getElementById('cakeStage');
 
+function playAmbient() {
+  if (!ambientAudio) {
+    ambientAudio = new Audio('ambient.mp3');
+    ambientAudio.loop = true;
+  }
+  ambientAudio.play().catch(function(e) {
+    console.warn('Ambient playback failed:', e);
+  });
+}
+
+function stopAmbient() {
+  if (ambientAudio) {
+    ambientAudio.pause();
+    ambientAudio.currentTime = 0;
+  }
+}
+
 function playBirthdaySong() {
+  stopAmbient();
   if (!birthdayAudio) {
     birthdayAudio = new Audio('birthday.mp3');
     birthdayAudio.loop = false;
@@ -441,6 +460,9 @@ function showWish(index, direction) {
   if (phase !== 'wishes') return;
 
   isTransitioning = true;
+
+  // Start ambient music on first interaction (browser autoplay policy)
+  if (!ambientAudio) { playAmbient(); }
 
   const exitClass = direction === 'up' ? 'exit-up' : 'exit-down';
 
