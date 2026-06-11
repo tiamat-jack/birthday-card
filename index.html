@@ -307,7 +307,6 @@
 .star-props {
   position: absolute;
   top: 0; left: 0; right: 0;
-  height: 0;
   pointer-events: none;
   z-index: 8;
 }
@@ -510,6 +509,16 @@ let touchStartY = 0;
 let isTransitioning = false;
 let birthdayAudio = null;
 let ambientAudio = null;
+
+// Preload audio on page load so playback starts instantly on first interaction
+ambientAudio = new Audio('ambient.mp3');
+ambientAudio.loop = true;
+ambientAudio.preload = 'auto';
+
+birthdayAudio = new Audio('birthday.mp3');
+birthdayAudio.loop = false;
+birthdayAudio.preload = 'auto';
+
 const totalWishes = 6;
 const isDesktop = !('ontouchstart' in window) && window.matchMedia('(pointer: fine)').matches;
 
@@ -547,10 +556,6 @@ function retractStars() {
 }
 
 function playAmbient() {
-  if (!ambientAudio) {
-    ambientAudio = new Audio('ambient.mp3');
-    ambientAudio.loop = true;
-  }
   ambientAudio.play().catch(function(e) {
     console.warn('Ambient playback failed:', e);
   });
@@ -565,10 +570,6 @@ function stopAmbient() {
 
 function playBirthdaySong() {
   stopAmbient();
-  if (!birthdayAudio) {
-    birthdayAudio = new Audio('birthday.mp3');
-    birthdayAudio.loop = false;
-  }
   birthdayAudio.currentTime = 0;
   birthdayAudio.play().catch(function(e) {
     console.warn('Audio playback failed:', e);
@@ -620,7 +621,7 @@ function showWish(index, direction) {
   isTransitioning = true;
 
   // Start ambient music on first interaction (browser autoplay policy)
-  if (!ambientAudio) { playAmbient(); }
+  if (ambientAudio.paused) { playAmbient(); }
 
   const exitClass = direction === 'up' ? 'exit-up' : 'exit-down';
 
