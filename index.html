@@ -302,6 +302,101 @@
   80% { transform: scale(0.9) rotate(-2deg); }
   100% { opacity: 1; transform: scale(1) rotate(0deg); }
 }
+
+/* ===== Star Stage Props ===== */
+.star-props {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 0;
+  pointer-events: none;
+  z-index: 8;
+}
+
+.star-prop {
+  position: absolute;
+  top: 0;
+  transform: translateY(-260px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.7s cubic-bezier(0.22, 0.61, 0.36, 1);
+  will-change: transform;
+}
+
+/* Retract: faster ease-in for "pulling up" feel */
+.star-prop.retracting {
+  transition: transform 0.5s cubic-bezier(0.55, 0.06, 0.68, 0.19);
+}
+
+/* Metallic pole / stage batten rod */
+.star-pole {
+  position: relative;
+  width: 3px;
+  background: linear-gradient(90deg, #7a7a7a, #b0b0b0 25%, #e8e8e8 50%, #b0b0b0 75%, #7a7a7a);
+  border-radius: 2px;
+  box-shadow: 0 0 6px rgba(180, 180, 200, 0.5);
+}
+
+/* Cross bar at top (stage fly batten) */
+.star-pole::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 4px;
+  background: linear-gradient(180deg, #d0d0d0, #8a8a8a);
+  border-radius: 2px;
+  box-shadow: 0 0 4px rgba(180, 180, 200, 0.4);
+}
+
+/* Ring connector at bottom of pole */
+.star-pole::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 8px;
+  height: 8px;
+  border: 2px solid #a8a8a8;
+  border-radius: 50%;
+  background: rgba(180, 180, 200, 0.25);
+  box-shadow: 0 0 3px rgba(180, 180, 200, 0.4);
+}
+
+/* Golden glowing star */
+.star-shape {
+  width: 28px;
+  height: 28px;
+  background: radial-gradient(ellipse at 35% 30%, #fffef0 0%, #ffe566 25%, #f0b800 65%, #d48900 100%);
+  clip-path: polygon(
+    50% 0%, 61% 35%, 98% 35%, 68% 57%,
+    79% 91%, 50% 70%, 21% 91%, 32% 57%,
+    2% 35%, 39% 35%
+  );
+  box-shadow:
+    0 0 6px 3px rgba(255, 215, 0, 0.8),
+    0 0 16px 6px rgba(255, 200, 0, 0.5),
+    0 0 32px 10px rgba(255, 160, 0, 0.25);
+  margin-top: 1px;
+}
+
+/* Gentle sway after dropping */
+.star-prop.swaying .star-shape {
+  animation: starSway var(--sway-dur, 3.2s) ease-in-out infinite;
+  animation-delay: var(--sway-del, 0s);
+}
+
+@keyframes starSway {
+  0%, 100% { transform: translateX(0) rotate(0deg); }
+  12%  { transform: translateX(3px) rotate(2.5deg); }
+  30%  { transform: translateX(-2.5px) rotate(-2deg); }
+  50%  { transform: translateX(2px) rotate(1.5deg); }
+  68%  { transform: translateX(-3px) rotate(-2.5deg); }
+  85%  { transform: translateX(1.5px) rotate(1deg); }
+}
   </style>
 </head>
 <body>
@@ -337,6 +432,29 @@
     })();
   </script>
   <div class="card" id="card">
+    <!-- Stage fly props: stars on poles -->
+    <div class="star-props" id="starProps">
+      <div class="star-prop" style="left: 7%; --sway-dur: 3.6s; --sway-del: 0s;" data-depth="0">
+        <div class="star-pole" style="height: 40px;"></div>
+        <div class="star-shape"></div>
+      </div>
+      <div class="star-prop" style="left: 23%; --sway-dur: 2.8s; --sway-del: 0.3s;" data-depth="0">
+        <div class="star-pole" style="height: 105px;"></div>
+        <div class="star-shape"></div>
+      </div>
+      <div class="star-prop" style="left: 43%; --sway-dur: 3.4s; --sway-del: 0.6s;" data-depth="0">
+        <div class="star-pole" style="height: 58px;"></div>
+        <div class="star-shape"></div>
+      </div>
+      <div class="star-prop" style="left: 63%; --sway-dur: 3.0s; --sway-del: 0.15s;" data-depth="0">
+        <div class="star-pole" style="height: 130px;"></div>
+        <div class="star-shape"></div>
+      </div>
+      <div class="star-prop" style="left: 81%; --sway-dur: 3.8s; --sway-del: 0.45s;" data-depth="0">
+        <div class="star-pole" style="height: 72px;"></div>
+        <div class="star-shape"></div>
+      </div>
+    </div>
     <div class="title-zone" id="titleZone">
       <span class="title-char">生</span>
       <span class="title-char">日</span>
@@ -399,6 +517,34 @@ const wishEls = document.querySelectorAll('.wish-text');
 const hintZone = document.getElementById('hintZone');
 const titleZone = document.getElementById('titleZone');
 const cakeStage = document.getElementById('cakeStage');
+const starPropEls = document.querySelectorAll('.star-prop');
+
+/* ===== Star Stage Props ===== */
+function dropStars() {
+  starPropEls.forEach(function(el, i) {
+    setTimeout(function() {
+      el.style.transform = 'translateY(0)';
+      // Add gentle sway after drop animation completes
+      setTimeout(function() {
+        el.classList.add('swaying');
+      }, 700);
+    }, i * 130);
+  });
+}
+
+function retractStars() {
+  starPropEls.forEach(function(el, i) {
+    el.classList.remove('swaying');
+    el.classList.add('retracting');
+    setTimeout(function() {
+      el.style.transform = 'translateY(-260px)';
+    }, i * 90);
+    // Clean up retracting class after animation
+    setTimeout(function() {
+      el.classList.remove('retracting');
+    }, 600 + i * 90);
+  });
+}
 
 function playAmbient() {
   if (!ambientAudio) {
@@ -443,6 +589,9 @@ function startCakePhase() {
   phase = 'cake';
   hintZone.style.opacity = '0';
 
+  // Retract star stage props
+  retractStars();
+
   wishEls.forEach(el => { el.classList.remove('active'); el.style.display = 'none'; });
   document.querySelector('.wish-container').style.display = 'none';
 
@@ -480,6 +629,9 @@ function showWish(index, direction) {
 
   wishEls[index].classList.remove('exit-up', 'exit-down');
   wishEls[index].classList.add('active');
+
+  // Star props: ensure stars are visible on all wish pages
+  dropStars();
 
   currentWish = index;
 
@@ -571,6 +723,9 @@ function spawnConfetti() {
 }
 
 document.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
+
+// Drop stars on initial page load (first wish page)
+setTimeout(function() { dropStars(); }, 400);
   </script>
 </body>
 </html>
